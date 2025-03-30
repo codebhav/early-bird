@@ -53,6 +53,7 @@ class Api {
 	 * @param {Object} options - Request options
 	 * @returns {Promise} - API response
 	 */
+	// src/app/utils/api.js - Improved error handling
 	async request(endpoint, options = {}) {
 		const url = `${this.baseUrl}${endpoint}`;
 		const headers = this.getHeaders();
@@ -67,15 +68,23 @@ class Api {
 
 		try {
 			const response = await fetch(url, config);
-			const data = await response.json();
+			let data;
+
+			try {
+				data = await response.json();
+			} catch (e) {
+				throw new Error(`Failed to parse response: ${e.message}`);
+			}
 
 			if (!response.ok) {
-				throw new Error(data.error || "Something went wrong");
+				const errorMessage =
+					data.error || `HTTP error! Status: ${response.status}`;
+				throw new Error(errorMessage);
 			}
 
 			return data;
 		} catch (error) {
-			console.error("API Error:", error);
+			console.error(`API Error (${url}):`, error);
 			throw error;
 		}
 	}

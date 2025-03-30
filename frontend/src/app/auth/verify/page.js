@@ -14,7 +14,11 @@ export default function VerifyMagicLink() {
 	const searchParams = useSearchParams();
 	const token = searchParams.get("token");
 
+	// src/app/auth/verify/page.js - Add retry mechanism
 	useEffect(() => {
+		let retryCount = 0;
+		const maxRetries = 3;
+
 		async function verifyMagicLink() {
 			if (!token) {
 				setError("Invalid link. No token provided.");
@@ -24,15 +28,20 @@ export default function VerifyMagicLink() {
 
 			try {
 				await verifyToken(token);
-
 				// Redirect to dashboard after successful verification
 				router.push("/dashboard");
 			} catch (error) {
-				setError(
-					error.message ||
-						"Invalid or expired link. Please try logging in again."
-				);
-				setVerifying(false);
+				if (retryCount < maxRetries) {
+					retryCount++;
+					// Wait 1 second before retrying
+					setTimeout(verifyMagicLink, 1000);
+				} else {
+					setError(
+						error.message ||
+							"Invalid or expired link. Please try logging in again."
+					);
+					setVerifying(false);
+				}
 			}
 		}
 

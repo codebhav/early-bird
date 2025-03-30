@@ -68,7 +68,7 @@ export default function AssignmentCard({ assignment, onComplete }) {
 						{assignment.title}
 					</h3>
 					<span
-						className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}
+						className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor()}`}
 						aria-label={`Status: ${getStatusText()}`}
 					>
 						{getStatusText()}
@@ -79,7 +79,7 @@ export default function AssignmentCard({ assignment, onComplete }) {
 					{assignment.description}
 				</p>
 
-				<div className="mb-4">
+				{/* <div className="mb-4">
 					<p className="text-xs text-gray-500 dark:text-gray-400 mb-1">
 						Progress {Math.round(progress)}%
 					</p>
@@ -89,7 +89,7 @@ export default function AssignmentCard({ assignment, onComplete }) {
 							progress
 						)}%`}
 					/>
-				</div>
+				</div> */}
 
 				<div className="flex justify-between items-center text-sm text-gray-500 dark:text-gray-400">
 					<div>{assignment.course}</div>

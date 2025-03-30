@@ -45,7 +45,7 @@ export const mockAssignments = [
 			"Write a detailed report on the acid-base titration experiment performed in lab session 5.",
 		course: "Chemistry 202",
 		startDate: "2025-03-22",
-		deadline: "2025-03-30",
+		deadline: "2025-04-3",
 		completed: false,
 		estimatedHours: 5,
 		coinsReward: 25,

@@ -9,10 +9,10 @@ import Leaderboard from "@/app/components/Leaderboard";
 import AddAssignmentModal from "@/app/components/AddAssignmentModal";
 import { useAuth } from "@/app/contexts/AuthContext";
 import api from "@/app/utils/api";
-import { mockAssignments, mockFriends } from "@/app/data/mockData";
+// Remove this line: const { user, refreshUser } = useAuth();
 
 export default function Dashboard() {
-	const { user } = useAuth();
+	const { user, refreshUser } = useAuth(); // Now correctly used inside the component
 	const [assignments, setAssignments] = useState([]);
 	const [friends, setFriends] = useState([]);
 	const [activeTab, setActiveTab] = useState("progress");
@@ -20,23 +20,24 @@ export default function Dashboard() {
 	const [showAddModal, setShowAddModal] = useState(false);
 
 	// Fetch assignments and friends (mock data for demo)
+	// src/app/dashboard/page.js - Replace mock data with API calls
 	useEffect(() => {
 		const fetchData = async () => {
 			try {
 				setIsLoading(true);
 
-				// In a real app, this would use the API
-				// const assignmentsResponse = await api.getAssignments();
-				// const friendsResponse = await api.getFriends();
+				// Use the API to fetch real assignments instead of mock data
+				const assignmentsResponse = await api.getAssignments();
+				const friendsResponse = await api.getFriends();
 
-				// For demo purposes, we'll use mock data
-				setTimeout(() => {
-					setAssignments(mockAssignments);
-					setFriends(mockFriends);
-					setIsLoading(false);
-				}, 1000);
+				setAssignments(assignmentsResponse.assignments || []);
+				setFriends(friendsResponse.friends || []);
+				setIsLoading(false);
 			} catch (error) {
 				console.error("Error fetching data:", error);
+				// If there's an error, set empty arrays
+				setAssignments([]);
+				setFriends([]);
 				setIsLoading(false);
 			}
 		};
@@ -47,38 +48,39 @@ export default function Dashboard() {
 	// Handle assignment completion
 	const handleCompleteAssignment = async (assignmentId) => {
 		try {
-			// In a real app, this would use the API
-			// const response = await api.completeAssignment(assignmentId);
+			setIsLoading(true);
+			// Use the API to mark assignment as complete
+			const response = await api.completeAssignment(assignmentId);
 
-			// For demo, we'll update the local state
+			// Update the local state with completed assignment
 			setAssignments(
 				assignments.map((assignment) =>
 					assignment.id === assignmentId
-						? {
-								...assignment,
-								completed: true,
-								completedDate: new Date().toISOString(),
-						  }
+						? response.assignment
 						: assignment
 				)
 			);
 
-			// Update user QuackCoins (mock implementation)
-			const completedAssignment = assignments.find(
-				(a) => a.id === assignmentId
-			);
-			if (completedAssignment && user) {
-				// Refresh user data with updated coins in a real app
-				// await refreshUser();
-			}
+			// Refresh user data to get updated coin count
+			await refreshUser();
+			setIsLoading(false);
 		} catch (error) {
 			console.error("Error completing assignment:", error);
+			setIsLoading(false);
 		}
 	};
 
 	// Handle adding a new assignment
-	const handleAddAssignment = (newAssignment) => {
-		setAssignments([...assignments, newAssignment]);
+	// src/app/dashboard/page.js - Update handleAddAssignment
+	const handleAddAssignment = async (newAssignment) => {
+		try {
+			// Use the API to create a new assignment
+			const response = await api.createAssignment(newAssignment);
+			// Update the local state with the new assignment
+			setAssignments([...assignments, response.assignment]);
+		} catch (error) {
+			console.error("Error adding assignment:", error);
+		}
 	};
 
 	return (

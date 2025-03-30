@@ -8,6 +8,9 @@ export default function ThemeSwitcher() {
 
 	// Initialize theme based on system preference or localStorage
 	useEffect(() => {
+		// Only run on client-side
+		if (typeof window === "undefined") return;
+
 		const savedTheme = localStorage.getItem("theme");
 		const prefersDark = window.matchMedia(
 			"(prefers-color-scheme: dark)"
@@ -17,6 +20,9 @@ export default function ThemeSwitcher() {
 		if (savedTheme === "dark" || (!savedTheme && prefersDark)) {
 			setDarkMode(true);
 			document.documentElement.classList.add("dark");
+		} else {
+			setDarkMode(false);
+			document.documentElement.classList.remove("dark");
 		}
 	}, []);
 
@@ -32,7 +38,16 @@ export default function ThemeSwitcher() {
 	}, [darkMode]);
 
 	const toggleTheme = () => {
-		setDarkMode(!darkMode);
+		const newDarkMode = !darkMode;
+		setDarkMode(newDarkMode);
+
+		if (newDarkMode) {
+			document.documentElement.classList.add("dark");
+			localStorage.setItem("theme", "dark");
+		} else {
+			document.documentElement.classList.remove("dark");
+			localStorage.setItem("theme", "light");
+		}
 	};
 
 	return (
