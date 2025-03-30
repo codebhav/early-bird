@@ -78,7 +78,7 @@ export default function Leaderboard({ friends, user }) {
 	return (
 		<div>
 			<h3 className="text-lg font-medium text-gray-900 dark:text-white mb-4">
-				QuackCoins Leaderboard
+				QuackCoins Pecking Order
 			</h3>
 
 			<div className="relative overflow-hidden">

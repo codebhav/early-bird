@@ -27,17 +27,12 @@ export default function Login() {
 		return re.test(email);
 	};
 
+	// Replace the current handleSubmit with:
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setError("");
 
-		// Validate email
-		if (!email) {
-			setError("Please enter your email address");
-			return;
-		}
-
-		if (!validateEmail(email)) {
+		if (!email || !validateEmail(email)) {
 			setError("Please enter a valid email address");
 			return;
 		}
@@ -45,24 +40,21 @@ export default function Login() {
 		setIsSubmitting(true);
 
 		try {
-			// In a real app, this would connect to your auth provider
-			// await login(email);
+			await login(email);
+			setIsMagicLinkSent(true);
 
-			// For demo, simulate the API call
-			setTimeout(() => {
-				setIsSubmitting(false);
-				setIsMagicLinkSent(true);
-
-				// For demo purposes, redirect to dashboard after 3 seconds
+			// In development, auto-login after 3 seconds
+			if (process.env.NODE_ENV === "development") {
 				setTimeout(() => {
 					router.push("/dashboard");
 				}, 3000);
-			}, 1500);
+			}
 		} catch (error) {
 			console.error("Login error:", error);
 			setError(
 				error.message || "Failed to send login link. Please try again."
 			);
+		} finally {
 			setIsSubmitting(false);
 		}
 	};
