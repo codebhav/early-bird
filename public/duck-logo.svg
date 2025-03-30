@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Duck body -->
+  <ellipse cx="100" cy="110" rx="70" ry="60" fill="#FFD43B" />
+  
+  <!-- Duck head -->
+  <circle cx="150" cy="70" r="40" fill="#FFD43B" />
+  
+  <!-- Duck eye -->
+  <circle cx="170" cy="60" r="8" fill="#333" />
+  <circle cx="168" cy="58" r="2" fill="#fff" />
+  
+  <!-- Duck bill -->
+  <path d="M195 70 C205 80, 205 90, 195 100 L185 100 C185 90, 185 80, 185 70 Z" fill="#FF9800" />
+  
+  <!-- Duck wing -->
+  <ellipse cx="70" cy="110" rx="30" ry="25" fill="#FFC107" transform="rotate(-10, 70, 110)" />
+  
+  <!-- Duck feet -->
+  <path d="M75 170 L60 190 L90 190 Z" fill="#FF9800" />
+  <path d="M125 170 L110 190 L140 190 Z" fill="#FF9800" />
+  
+  <!-- Small clock/watch -->
+  <circle cx="140" cy="110" r="15" fill="#FFFFFF" stroke="#333" stroke-width="2" />
+  <line x1="140" y1="110" x2="140" y2="100" stroke="#333" stroke-width="2" />
+  <line x1="140" y1="110" x2="148" y2="115" stroke="#333" stroke-width="2" />
+  
+  <!-- Small graduation cap -->
+  <rect x="155" cy="50" width="20" height="5" fill="#333" />
+  <polygon points="145,50 185,50 165,30" fill="#333" />
+  <line x1="165" y1="30" x2="180" y2="45" stroke="#FFF" stroke-width="1" />
+</svg>
