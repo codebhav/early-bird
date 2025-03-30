@@ -2,174 +2,249 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
-import Link from "next/link";
+import AppLayout from "@/app/components/AppLayout";
 import AssignmentCard from "@/app/components/AssignmentCard";
 import ProgressSection from "@/app/components/ProgressSection";
 import Leaderboard from "@/app/components/Leaderboard";
+import AddAssignmentModal from "@/app/components/AddAssignmentModal";
+import { useAuth } from "@/app/contexts/AuthContext";
+import api from "@/app/utils/api";
 import { mockAssignments, mockFriends } from "@/app/data/mockData";
 
 export default function Dashboard() {
+	const { user } = useAuth();
 	const [assignments, setAssignments] = useState([]);
+	const [friends, setFriends] = useState([]);
 	const [activeTab, setActiveTab] = useState("progress");
-	const [user, setUser] = useState({
-		name: "Student Name",
-		email: "student@example.com",
-		quackCoins: 120,
-		avatar: "/avatar-placeholder.png",
-	});
+	const [isLoading, setIsLoading] = useState(true);
+	const [showAddModal, setShowAddModal] = useState(false);
 
-	// Fetch assignments (mock data for now)
+	// Fetch assignments and friends (mock data for demo)
 	useEffect(() => {
-		// Simulate API call delay
-		const timer = setTimeout(() => {
-			setAssignments(mockAssignments);
-		}, 500);
+		const fetchData = async () => {
+			try {
+				setIsLoading(true);
 
-		return () => clearTimeout(timer);
+				// In a real app, this would use the API
+				// const assignmentsResponse = await api.getAssignments();
+				// const friendsResponse = await api.getFriends();
+
+				// For demo purposes, we'll use mock data
+				setTimeout(() => {
+					setAssignments(mockAssignments);
+					setFriends(mockFriends);
+					setIsLoading(false);
+				}, 1000);
+			} catch (error) {
+				console.error("Error fetching data:", error);
+				setIsLoading(false);
+			}
+		};
+
+		fetchData();
 	}, []);
 
+	// Handle assignment completion
+	const handleCompleteAssignment = async (assignmentId) => {
+		try {
+			// In a real app, this would use the API
+			// const response = await api.completeAssignment(assignmentId);
+
+			// For demo, we'll update the local state
+			setAssignments(
+				assignments.map((assignment) =>
+					assignment.id === assignmentId
+						? {
+								...assignment,
+								completed: true,
+								completedDate: new Date().toISOString(),
+						  }
+						: assignment
+				)
+			);
+
+			// Update user QuackCoins (mock implementation)
+			const completedAssignment = assignments.find(
+				(a) => a.id === assignmentId
+			);
+			if (completedAssignment && user) {
+				// Refresh user data with updated coins in a real app
+				// await refreshUser();
+			}
+		} catch (error) {
+			console.error("Error completing assignment:", error);
+		}
+	};
+
+	// Handle adding a new assignment
+	const handleAddAssignment = (newAssignment) => {
+		setAssignments([...assignments, newAssignment]);
+	};
+
 	return (
-		<div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-			{/* Header */}
-			<header className="bg-white dark:bg-gray-800 shadow">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-					<div className="flex items-center">
-						<div className="relative w-10 h-10">
-							<Image
-								src="/duck-logo.svg"
-								alt="Early Bird Logo"
-								fill
-								className="object-contain"
-							/>
-						</div>
-						<h1 className="ml-3 text-xl font-bold text-gray-900 dark:text-white">
-							Early Bird
-						</h1>
-					</div>
-
-					<div className="flex items-center space-x-4">
-						<span className="flex items-center bg-yellow-100 text-yellow-800 dark:bg-yellow-800 dark:text-yellow-100 px-3 py-1 rounded-full">
-							<svg
-								className="h-4 w-4 mr-1"
-								viewBox="0 0 20 20"
-								fill="currentColor"
-							>
-								<path
-									fillRule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-									clipRule="evenodd"
-								/>
-							</svg>
-							<span>{user.quackCoins} QuackCoins</span>
-						</span>
-
-						<Link href="/profile" className="flex items-center">
-							<span className="sr-only">Your profile</span>
-							<div className="relative w-8 h-8 rounded-full overflow-hidden">
-								<Image
-									src={user.avatar}
-									alt="Profile"
-									fill
-									className="object-cover"
-								/>
-							</div>
-							<span className="ml-2 font-medium text-gray-700 dark:text-gray-200">
-								{user.name}
-							</span>
-						</Link>
-					</div>
-				</div>
-			</header>
-
-			{/* Main content */}
-			<main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-				<h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+		<AppLayout>
+			<div className="flex justify-between items-center mb-6">
+				<h2 className="text-2xl font-bold text-gray-900 dark:text-white">
 					Your Assignments
 				</h2>
 
-				{/* Assignment cards */}
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-					{assignments.length > 0 ? (
-						assignments.map((assignment) => (
-							<AssignmentCard
-								key={assignment.id}
-								assignment={assignment}
-							/>
-						))
-					) : (
-						<div className="col-span-full flex justify-center items-center py-12 text-gray-500 dark:text-gray-400">
+				<button
+					onClick={() => setShowAddModal(true)}
+					className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+					aria-label="Add new assignment"
+				>
+					<svg
+						className="-ml-1 mr-2 h-5 w-5"
+						xmlns="http://www.w3.org/2000/svg"
+						viewBox="0 0 20 20"
+						fill="currentColor"
+						aria-hidden="true"
+					>
+						<path
+							fillRule="evenodd"
+							d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+							clipRule="evenodd"
+						/>
+					</svg>
+					Add Assignment
+				</button>
+			</div>
+
+			{/* Add Assignment Modal */}
+			<AddAssignmentModal
+				isOpen={showAddModal}
+				onClose={() => setShowAddModal(false)}
+				onAssignmentAdded={handleAddAssignment}
+			/>
+
+			{/* Assignment cards */}
+			<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+				{isLoading ? (
+					<div className="col-span-full flex justify-center items-center py-12 text-gray-500 dark:text-gray-400">
+						<svg
+							className="animate-spin -ml-1 mr-3 h-5 w-5"
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							aria-hidden="true"
+						>
+							<circle
+								className="opacity-25"
+								cx="12"
+								cy="12"
+								r="10"
+								stroke="currentColor"
+								strokeWidth="4"
+							></circle>
+							<path
+								className="opacity-75"
+								fill="currentColor"
+								d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+							></path>
+						</svg>
+						Loading assignments...
+					</div>
+				) : assignments.length > 0 ? (
+					assignments.map((assignment) => (
+						<AssignmentCard
+							key={assignment.id}
+							assignment={assignment}
+							onComplete={() =>
+								handleCompleteAssignment(assignment.id)
+							}
+						/>
+					))
+				) : (
+					<div className="col-span-full text-center py-10 bg-white dark:bg-gray-800 rounded-lg shadow">
+						<div className="flex flex-col items-center">
 							<svg
-								className="animate-spin -ml-1 mr-3 h-5 w-5"
+								className="h-12 w-12 text-gray-400 mb-4"
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
+								stroke="currentColor"
+								aria-hidden="true"
 							>
-								<circle
-									className="opacity-25"
-									cx="12"
-									cy="12"
-									r="10"
-									stroke="currentColor"
-									strokeWidth="4"
-								></circle>
 								<path
-									className="opacity-75"
-									fill="currentColor"
-									d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-								></path>
+									strokeLinecap="round"
+									strokeLinejoin="round"
+									strokeWidth={2}
+									d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+								/>
 							</svg>
-							Loading assignments...
+							<h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+								No assignments yet
+							</h3>
+							<p className="text-gray-500 dark:text-gray-400 mb-4">
+								Get started by adding your first assignment
+							</p>
+							<button
+								onClick={() => setShowAddModal(true)}
+								className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+							>
+								<svg
+									className="-ml-1 mr-2 h-5 w-5"
+									xmlns="http://www.w3.org/2000/svg"
+									viewBox="0 0 20 20"
+									fill="currentColor"
+									aria-hidden="true"
+								>
+									<path
+										fillRule="evenodd"
+										d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z"
+										clipRule="evenodd"
+									/>
+								</svg>
+								Add Assignment
+							</button>
 						</div>
+					</div>
+				)}
+			</div>
+
+			{/* Tabs for Progress and Leaderboard */}
+			<div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
+				<div className="border-b border-gray-200 dark:border-gray-700">
+					<nav className="flex" aria-label="Tabs">
+						<button
+							onClick={() => setActiveTab("progress")}
+							className={`px-6 py-3 text-sm font-medium ${
+								activeTab === "progress"
+									? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
+									: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+							}`}
+							aria-current={
+								activeTab === "progress" ? "page" : undefined
+							}
+							aria-label="View progress statistics"
+						>
+							Progress
+						</button>
+						<button
+							onClick={() => setActiveTab("leaderboard")}
+							className={`px-6 py-3 text-sm font-medium ${
+								activeTab === "leaderboard"
+									? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
+									: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+							}`}
+							aria-current={
+								activeTab === "leaderboard" ? "page" : undefined
+							}
+							aria-label="View leaderboard"
+						>
+							Leaderboard
+						</button>
+					</nav>
+				</div>
+
+				<div className="p-6">
+					{activeTab === "progress" ? (
+						<ProgressSection assignments={assignments} />
+					) : (
+						<Leaderboard friends={friends} user={user || {}} />
 					)}
 				</div>
-
-				{/* Tabs for Progress and Leaderboard */}
-				<div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden mb-8">
-					<div className="border-b border-gray-200 dark:border-gray-700">
-						<nav className="flex" aria-label="Tabs">
-							<button
-								onClick={() => setActiveTab("progress")}
-								className={`px-6 py-3 text-sm font-medium ${
-									activeTab === "progress"
-										? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
-										: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-								}`}
-								aria-current={
-									activeTab === "progress"
-										? "page"
-										: undefined
-								}
-							>
-								Progress
-							</button>
-							<button
-								onClick={() => setActiveTab("leaderboard")}
-								className={`px-6 py-3 text-sm font-medium ${
-									activeTab === "leaderboard"
-										? "text-blue-600 dark:text-blue-400 border-b-2 border-blue-500"
-										: "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
-								}`}
-								aria-current={
-									activeTab === "leaderboard"
-										? "page"
-										: undefined
-								}
-							>
-								Leaderboard
-							</button>
-						</nav>
-					</div>
-
-					<div className="p-6">
-						{activeTab === "progress" ? (
-							<ProgressSection assignments={assignments} />
-						) : (
-							<Leaderboard friends={mockFriends} user={user} />
-						)}
-					</div>
-				</div>
-			</main>
-		</div>
+			</div>
+		</AppLayout>
 	);
 }

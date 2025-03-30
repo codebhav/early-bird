@@ -1,12 +1,19 @@
-// src/components/DuckProgress.js
+// src/app/components/DuckProgress.js
 "use client";
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
 
-export default function DuckProgress({ progress = 0, height = 12 }) {
+export default function DuckProgress({
+	progress = 0,
+	height = 12,
+	id,
+	...props
+}) {
 	const progressBarRef = useRef(null);
 	const duckRef = useRef(null);
+	const uniqueId =
+		id || `duck-progress-${Math.random().toString(36).substring(2, 10)}`;
 
 	useEffect(() => {
 		if (progressBarRef.current && duckRef.current) {
@@ -29,8 +36,10 @@ export default function DuckProgress({ progress = 0, height = 12 }) {
 			className="relative w-full"
 			aria-valuemin="0"
 			aria-valuemax="100"
-			aria-valuenow={progress}
+			aria-valuenow={Math.round(progress)}
 			role="progressbar"
+			id={uniqueId}
+			{...props}
 		>
 			{/* Progress bar background */}
 			<div
@@ -53,10 +62,11 @@ export default function DuckProgress({ progress = 0, height = 12 }) {
 					height: `${height * 2.5}px`,
 					width: `${height * 2.5}px`,
 				}}
+				aria-hidden="true"
 			>
 				<Image
 					src="/duck-character.svg"
-					alt="Progress duck"
+					alt=""
 					width={height * 2.5}
 					height={height * 2.5}
 					className={
@@ -64,6 +74,13 @@ export default function DuckProgress({ progress = 0, height = 12 }) {
 					}
 				/>
 			</div>
+
+			{/* Visually hidden text for screen readers */}
+			<span className="sr-only">
+				{progress === 100
+					? "Completed! 100% progress"
+					: `${Math.round(progress)}% progress`}
+			</span>
 
 			{/* CSS for duck animations */}
 			<style jsx global>{`
